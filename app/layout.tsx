@@ -41,28 +41,39 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: 'A&M Pro Dispatch | Your Freight. Our Focus.',
+    title: 'A&M Pro Dispatch | Professional Truck Dispatching Services USA',
     description:
-      'Premier freight dispatching services for owner-operators and fleet carriers across the United States. High-paying loads, transparent fees, no forced dispatch.',
+      'Premier freight dispatching for owner-operators and fleet carriers nationwide. High-dollar load sourcing, aggressive rate negotiation, complete broker packets, and 24/7 driver support. 100% No Forced Dispatch.',
     url: 'https://amprodispatch.com',
     siteName: 'A&M Pro Dispatch',
     locale: 'en_US',
     type: 'website',
     images: [
       {
-        url: '/logo-dark.jpg',
+        url: '/og-image.jpg',
+        secureUrl: 'https://amprodispatch.com/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'A&M Pro Dispatch - Your Freight. Our Focus.',
+        type: 'image/jpeg',
+        alt: 'A&M Pro Dispatch - Dedicated Freight Dispatching Services USA (770) 601-6344',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'A&M Pro Dispatch | Professional Truck Dispatching Services',
+    title: 'A&M Pro Dispatch | Professional Truck Dispatching Services USA',
     description:
-      'Dedicated truck dispatchers fighting for top rate-per-mile, handling paperwork, and supporting drivers 24/7 nationwide.',
-    images: ['/logo-dark.jpg'],
+      'Dedicated truck dispatchers fighting for top rate-per-mile, handling broker packets, and supporting drivers 24/7 nationwide. Your Freight. Our Focus.',
+    site: '@amprodispatch',
+    creator: '@amprodispatch',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'A&M Pro Dispatch - Dedicated Freight Dispatching Services USA (770) 601-6344',
+      },
+    ],
   },
   robots: {
     index: true,
@@ -79,6 +90,11 @@ export const metadata: Metadata = {
   icons: {
     icon: '/logo.jpg',
     apple: '/logo.jpg',
+  },
+  other: {
+    'og:image:width': '1200',
+    'og:image:height': '630',
+    'og:image:type': 'image/jpeg',
   },
 };
 
@@ -101,7 +117,7 @@ export default function RootLayout({
     email: 'Esmeralda@amprodispatch.com',
     url: 'https://amprodispatch.com',
     logo: 'https://amprodispatch.com/logo.jpg',
-    image: 'https://amprodispatch.com/logo-dark.jpg',
+    image: 'https://amprodispatch.com/og-image.jpg',
     priceRange: '$$',
     areaServed: {
       '@type': 'Country',
