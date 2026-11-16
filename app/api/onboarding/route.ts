@@ -1,5 +1,23 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import {
+  validateName,
+  validateEmail,
+  validatePhone,
+  validateMCNumber,
+  validateDOTNumber,
+  sanitizeText,
+  escapeHtml,
+} from '@/lib/validation';
+
+const ALLOWED_EQUIPMENT = [
+  'Dry Van (53ft)',
+  'Reefer (53ft)',
+  'Flatbed / Stepdeck',
+  'Box Truck (24-26ft)',
+  'Power Only',
+  'Hotshot (40ft)',
+];
 
 export async function POST(req: Request) {
   try {
@@ -15,38 +33,88 @@ export async function POST(req: Request) {
       truckCount,
       factoringCompany,
       preferredLanes,
+      hp,
     } = body;
 
-    if (!contactName || !phone || !email || !mcNumber) {
-      return NextResponse.json(
-        { error: 'Contact name, phone, email, and MC Number are required.' },
-        { status: 400 }
-      );
+    // Honeypot spam trap
+    if (hp) {
+      console.warn('🤖 Spam bot submission blocked by honeypot on onboarding.');
+      return NextResponse.json({ success: true, message: 'Onboarding packet received.' });
     }
 
+    // 1. Strict Validation
+    const companyVal = validateName(companyName || contactName, 'Company / Carrier Name');
+    if (!companyVal.isValid) {
+      return NextResponse.json({ error: companyVal.error }, { status: 400 });
+    }
+
+    const contactVal = validateName(contactName, 'Contact Person Name');
+    if (!contactVal.isValid) {
+      return NextResponse.json({ error: contactVal.error }, { status: 400 });
+    }
+
+    const emailVal = validateEmail(email);
+    if (!emailVal.isValid) {
+      return NextResponse.json({ error: emailVal.error }, { status: 400 });
+    }
+
+    const phoneVal = validatePhone(phone);
+    if (!phoneVal.isValid) {
+      return NextResponse.json({ error: phoneVal.error }, { status: 400 });
+    }
+
+    const mcVal = validateMCNumber(mcNumber);
+    if (!mcVal.isValid) {
+      return NextResponse.json({ error: mcVal.error }, { status: 400 });
+    }
+
+    const dotVal = validateDOTNumber(dotNumber);
+    if (!dotVal.isValid) {
+      return NextResponse.json({ error: dotVal.error }, { status: 400 });
+    }
+
+    const cleanEquipment = ALLOWED_EQUIPMENT.includes(equipmentType) ? equipmentType : 'Dry Van (53ft)';
+    const cleanCompany = companyVal.cleanValue;
+    const cleanContact = contactVal.cleanValue;
+    const cleanEmail = emailVal.cleanValue;
+    const formattedPhone = phoneVal.formatted;
+    const formattedMC = mcVal.formatted;
+    const formattedDOT = dotVal.formatted || 'Not Provided';
+    const cleanTruckCount = sanitizeText(truckCount) || '1 Truck (Owner Operator)';
+    const cleanFactoring = sanitizeText(factoringCompany) || 'Not Provided / Direct Billing';
+    const cleanLanes = sanitizeText(preferredLanes) || 'Midwest & Southeast (Flexible)';
+
     const apiKey = process.env.RESEND_API_KEY;
-    const recipientEmail = process.env.DISPATCH_EMAIL_TO || 'Esmeralda@amprodispatch.com';
+    const recipientEmail = process.env.DISPATCH_EMAIL_TO || 'dispatchampro@gmail.com';
     const senderEmail = process.env.DISPATCH_EMAIL_FROM || 'A&M Pro Dispatch <onboarding@resend.dev>';
 
     // Fallback simulation mode for local dev without API key
     if (!apiKey || apiKey.includes('placeholder')) {
       console.warn('⚠️ RESEND_API_KEY is not configured. Simulating carrier onboarding email:');
-      console.log(body);
+      console.log({
+        cleanCompany,
+        cleanContact,
+        cleanEmail,
+        formattedPhone,
+        formattedMC,
+        formattedDOT,
+        cleanEquipment,
+      });
       return NextResponse.json({
         success: true,
         simulated: true,
-        message: 'Carrier onboarding packet received (Development Mode: Set RESEND_API_KEY for live delivery).',
+        message: 'Carrier onboarding packet received (Development Mode: Live Resend key required for inbox delivery).',
       });
     }
 
     const resend = new Resend(apiKey);
 
-    // 1. Send Alert to Internal Operations Team
+    // 1. Send Alert to Internal Operations Team (dispatchampro@gmail.com)
     await resend.emails.send({
       from: senderEmail,
       to: [recipientEmail],
-      replyTo: email,
-      subject: `🚛 NEW CARRIER ONBOARDING: ${companyName || contactName} (MC# ${mcNumber})`,
+      replyTo: cleanEmail,
+      subject: `🚛 NEW CARRIER ONBOARDING: ${cleanCompany} (${formattedMC})`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f8fafc; color: #0b0f17;">
           <div style="max-width: 620px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
@@ -58,43 +126,80 @@ export async function POST(req: Request) {
             <div style="padding: 24px;">
               <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 12px 16px; margin-bottom: 20px;">
                 <p style="margin: 0; color: #991b1b; font-weight: bold; font-size: 14px;">
-                  ⚠️ Action Required: Verify authority on FMCSA SAFER & send Carrier Agreement.
+                  Action Required: A new carrier submitted their profile and is waiting for onboarding documents.
                 </p>
               </div>
 
-              <h2 style="font-size: 16px; color: #0b0f17; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #0b0f17; padding-bottom: 6px; margin-top: 0;">
-                Carrier Profile Information
+              <h2 style="font-size: 16px; color: #0b0f17; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;">
+                Carrier &amp; Authority Details
+              </h2>
+              
+              <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px;">
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569; width: 170px;">Carrier Company:</td>
+                  <td style="padding: 6px 0; color: #0b0f17; font-weight: 600;">${escapeHtml(cleanCompany)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569;">Contact Person:</td>
+                  <td style="padding: 6px 0; color: #0b0f17; font-weight: 600;">${escapeHtml(cleanContact)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569;">MC Number:</td>
+                  <td style="padding: 6px 0; color: #dc2626; font-weight: bold; font-size: 15px;">${escapeHtml(formattedMC)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569;">USDOT Number:</td>
+                  <td style="padding: 6px 0; color: #0b0f17;">${escapeHtml(formattedDOT)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569;">Direct Phone:</td>
+                  <td style="padding: 6px 0;"><a href="tel:${phoneVal.cleanValue}" style="color: #0b0f17; font-weight: bold; text-decoration: none;">${escapeHtml(formattedPhone)}</a></td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569;">Email Address:</td>
+                  <td style="padding: 6px 0;"><a href="mailto:${cleanEmail}" style="color: #dc2626; text-decoration: none;">${escapeHtml(cleanEmail)}</a></td>
+                </tr>
+              </table>
+
+              <h2 style="font-size: 16px; color: #0b0f17; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-top: 24px;">
+                Equipment &amp; Operational Capacity
               </h2>
 
-              <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px;">
-                <tr><td style="padding: 8px 0; color: #64748b; font-weight: bold; width: 160px;">Company Name:</td><td style="font-weight: bold; color: #0b0f17;">${companyName || 'N/A'}</td></tr>
-                <tr><td style="padding: 8px 0; color: #64748b; font-weight: bold;">Contact Name:</td><td style="font-weight: bold; color: #0b0f17;">${contactName}</td></tr>
-                <tr><td style="padding: 8px 0; color: #64748b; font-weight: bold;">Phone:</td><td><a href="tel:${phone}" style="color: #0b0f17; font-weight: bold; text-decoration: none;">${phone}</a></td></tr>
-                <tr><td style="padding: 8px 0; color: #64748b; font-weight: bold;">Email:</td><td><a href="mailto:${email}" style="color: #dc2626;">${email}</a></td></tr>
-                <tr style="background-color: #f8fafc;"><td style="padding: 8px 6px; color: #dc2626; font-weight: bold;">MC Number:</td><td style="padding: 8px 6px; color: #dc2626; font-weight: 800; font-size: 16px;">${mcNumber}</td></tr>
-                <tr><td style="padding: 8px 0; color: #64748b; font-weight: bold;">DOT Number:</td><td>${dotNumber || 'N/A'}</td></tr>
-                <tr><td style="padding: 8px 0; color: #64748b; font-weight: bold;">Equipment Type:</td><td><strong style="color: #0b0f17;">${equipmentType}</strong></td></tr>
-                <tr><td style="padding: 8px 0; color: #64748b; font-weight: bold;">Truck Count:</td><td>${truckCount || '1'}</td></tr>
-                <tr><td style="padding: 8px 0; color: #64748b; font-weight: bold;">Factoring Co:</td><td>${factoringCompany || 'None / QuickPay'}</td></tr>
-                <tr><td style="padding: 8px 0; color: #64748b; font-weight: bold;">Preferred Lanes:</td><td>${preferredLanes || 'All 48 States'}</td></tr>
+              <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px;">
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569; width: 170px;">Primary Equipment:</td>
+                  <td style="padding: 6px 0; color: #0b0f17; font-weight: 600;">${escapeHtml(cleanEquipment)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569;">Fleet Size:</td>
+                  <td style="padding: 6px 0; color: #0b0f17;">${escapeHtml(cleanTruckCount)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569;">Factoring Partner:</td>
+                  <td style="padding: 6px 0; color: #0b0f17;">${escapeHtml(cleanFactoring)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-weight: bold; color: #475569;">Preferred Lanes:</td>
+                  <td style="padding: 6px 0; color: #0b0f17;">${escapeHtml(cleanLanes)}</td>
+                </tr>
               </table>
             </div>
-
+            
             <div style="background-color: #f8fafc; padding: 14px 24px; font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0;">
-              A&M Pro Dispatch Internal Dispatch System • Confidential Carrier Data
+              Submitted via A&M Pro Dispatch Onboarding Portal • <a href="https://amprodispatch.com" style="color: #64748b;">amprodispatch.com</a>
             </div>
           </div>
         </div>
       `,
     });
 
-    // 2. Send Automated Confirmation & Document Request to the Driver (if allowed by sender domain)
+    // 2. Send Automated Confirmation & Document Request to the Driver (if permitted by sender domain)
     try {
-      if (!senderEmail.includes('resend.dev') || email.toLowerCase() === recipientEmail.toLowerCase()) {
+      if (!senderEmail.includes('resend.dev') || cleanEmail.toLowerCase() === recipientEmail.toLowerCase()) {
         await resend.emails.send({
           from: senderEmail,
-          to: [email],
-          subject: `Welcome to A&M Pro Dispatch! Getting MC# ${mcNumber} Rolling`,
+          to: [cleanEmail],
+          subject: `Welcome to A&M Pro Dispatch! Getting ${escapeHtml(formattedMC)} Rolling`,
           html: `
             <div style="font-family: Arial, sans-serif; padding: 24px; color: #0b0f17; max-width: 600px; margin: 0 auto; background: #ffffff;">
               <div style="border-bottom: 3px solid #dc2626; padding-bottom: 12px; margin-bottom: 20px;">
@@ -102,9 +207,9 @@ export async function POST(req: Request) {
                 <p style="color: #dc2626; margin: 2px 0 0; font-size: 12px; font-weight: bold;">YOUR FREIGHT. OUR FOCUS.</p>
               </div>
 
-              <h2 style="font-size: 18px; color: #0b0f17;">Welcome, ${contactName}!</h2>
+              <h2 style="font-size: 18px; color: #0b0f17;">Welcome, ${escapeHtml(cleanContact)}!</h2>
               <p style="font-size: 14px; line-height: 1.6; color: #334155;">
-                Thank you for submitting your carrier profile for <strong>${companyName || 'your trucking company'}</strong> (MC# ${mcNumber}).
+                Thank you for submitting your carrier profile for <strong>${escapeHtml(cleanCompany)}</strong> (${escapeHtml(formattedMC)}).
               </p>
               <p style="font-size: 14px; line-height: 1.6; color: #334155;">
                 Our dedicated dispatch team has received your equipment profile and is preparing your carrier onboarding packet.

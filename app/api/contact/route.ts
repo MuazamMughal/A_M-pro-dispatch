@@ -1,30 +1,56 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { validateName, validateEmail, validatePhone, validateMessage, escapeHtml } from '@/lib/validation';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, phone, message } = body;
+    const { name, email, phone, message, hp } = body;
 
-    if (!name || !email || !phone) {
-      return NextResponse.json(
-        { error: 'Name, email, and phone number are required.' },
-        { status: 400 }
-      );
+    // Honeypot spam trap: if hidden field is filled, silently discard bot submission
+    if (hp) {
+      console.warn('🤖 Spam bot submission blocked by honeypot.');
+      return NextResponse.json({ success: true, message: 'Message received.' });
     }
 
+    // 1. Strict Input Validation
+    const nameVal = validateName(name, 'Your Name');
+    if (!nameVal.isValid) {
+      return NextResponse.json({ error: nameVal.error }, { status: 400 });
+    }
+
+    const emailVal = validateEmail(email);
+    if (!emailVal.isValid) {
+      return NextResponse.json({ error: emailVal.error }, { status: 400 });
+    }
+
+    const phoneVal = validatePhone(phone);
+    if (!phoneVal.isValid) {
+      return NextResponse.json({ error: phoneVal.error }, { status: 400 });
+    }
+
+    const messageVal = validateMessage(message);
+    if (!messageVal.isValid) {
+      return NextResponse.json({ error: messageVal.error }, { status: 400 });
+    }
+
+    const cleanName = nameVal.cleanValue;
+    const cleanEmail = emailVal.cleanValue;
+    const formattedPhone = phoneVal.formatted;
+    const cleanMessage = messageVal.cleanValue;
+
     const apiKey = process.env.RESEND_API_KEY;
-    const recipientEmail = process.env.DISPATCH_EMAIL_TO || 'Esmeralda@amprodispatch.com';
+    const recipientEmail = process.env.DISPATCH_EMAIL_TO || 'dispatchampro@gmail.com';
     const senderEmail = process.env.DISPATCH_EMAIL_FROM || 'A&M Pro Dispatch <onboarding@resend.dev>';
 
-    // If API key is not configured or is placeholder, log and return graceful success for local dev
+    // Fallback simulation mode for local dev without configured API key
     if (!apiKey || apiKey.includes('placeholder')) {
       console.warn('⚠️ RESEND_API_KEY is not configured. Simulating email dispatch for Contact Form:');
-      console.log({ name, email, phone, message });
+      console.log({ cleanName, cleanEmail, formattedPhone, cleanMessage });
       return NextResponse.json({
         success: true,
         simulated: true,
-        message: 'Message received (Development Mode: Set RESEND_API_KEY in .env.local to deliver live emails).',
+        message: 'Message received (Development Mode: Live Resend key required for production inbox delivery).',
       });
     }
 
@@ -33,8 +59,8 @@ export async function POST(req: Request) {
     const data = await resend.emails.send({
       from: senderEmail,
       to: [recipientEmail],
-      replyTo: email,
-      subject: `🚨 Contact Inquiry: ${name} (${phone}) - A&M Pro Dispatch`,
+      replyTo: cleanEmail,
+      subject: `🚨 Contact Inquiry: ${cleanName} (${formattedPhone}) - A&M Pro Dispatch`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f8fafc; color: #0b0f17;">
           <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
@@ -49,22 +75,22 @@ export async function POST(req: Request) {
               <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px;">
                 <tr>
                   <td style="padding: 8px 0; font-weight: bold; color: #475569; width: 140px;">Contact Name:</td>
-                  <td style="padding: 8px 0; color: #0b0f17; font-weight: 600;">${name}</td>
+                  <td style="padding: 8px 0; color: #0b0f17; font-weight: 600;">${escapeHtml(cleanName)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; font-weight: bold; color: #475569;">Email Address:</td>
-                  <td style="padding: 8px 0;"><a href="mailto:${email}" style="color: #dc2626; text-decoration: none;">${email}</a></td>
+                  <td style="padding: 8px 0;"><a href="mailto:${cleanEmail}" style="color: #dc2626; text-decoration: none;">${escapeHtml(cleanEmail)}</a></td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; font-weight: bold; color: #475569;">Phone Number:</td>
-                  <td style="padding: 8px 0;"><a href="tel:${phone}" style="color: #0b0f17; font-weight: bold; text-decoration: none;">${phone}</a></td>
+                  <td style="padding: 8px 0;"><a href="tel:${phoneVal.cleanValue}" style="color: #0b0f17; font-weight: bold; text-decoration: none;">${escapeHtml(formattedPhone)}</a></td>
                 </tr>
               </table>
               
               <div style="margin-top: 20px;">
                 <h3 style="font-size: 14px; color: #475569; text-transform: uppercase; margin-bottom: 6px;">Message / Note:</h3>
                 <div style="padding: 16px; background-color: #f1f5f9; border-left: 4px solid #dc2626; border-radius: 4px; font-size: 14px; line-height: 1.6; color: #1e293b;">
-                  ${message || 'No additional message was provided.'}
+                  ${cleanMessage ? escapeHtml(cleanMessage) : '<em>No additional message was provided.</em>'}
                 </div>
               </div>
             </div>

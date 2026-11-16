@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Send, CheckCircle2, AlertCircle, Phone, Mail, Clock, ShieldCheck, Instagram, Facebook } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle, Phone, Mail, Clock, Instagram, Facebook } from 'lucide-react';
+import { validateName, validateEmail, validatePhone, validateMessage } from '@/lib/validation';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -9,16 +10,70 @@ export default function ContactForm() {
     email: '',
     phone: '',
     message: '',
+    hp: '', // Honeypot field for bot protection
   });
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [serverError, setServerError] = useState('');
+
+  // Handle phone input formatting: (XXX) XXX-XXXX
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 10);
+    let formatted = raw;
+    if (raw.length > 6) {
+      formatted = `(${raw.slice(0, 3)}) ${raw.slice(3, 6)}-${raw.slice(6)}`;
+    } else if (raw.length > 3) {
+      formatted = `(${raw.slice(0, 3)}) ${raw.slice(3)}`;
+    } else if (raw.length > 0) {
+      formatted = `(${raw}`;
+    }
+    setFormData((prev) => ({ ...prev, phone: formatted }));
+    if (fieldErrors.phone) {
+      setFieldErrors((prev) => ({ ...prev, phone: '' }));
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateAll = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    const nameCheck = validateName(formData.name, 'Your Name');
+    if (!nameCheck.isValid) errors.name = nameCheck.error || 'Invalid name';
+
+    const emailCheck = validateEmail(formData.email);
+    if (!emailCheck.isValid) errors.email = emailCheck.error || 'Invalid email';
+
+    const phoneCheck = validatePhone(formData.phone);
+    if (!phoneCheck.isValid) errors.phone = phoneCheck.error || 'Invalid phone';
+
+    const messageCheck = validateMessage(formData.message);
+    if (!messageCheck.isValid) errors.message = messageCheck.error || 'Invalid message';
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setStatus('idle');
-    setErrorMessage('');
+    setServerError('');
+
+    // Pre-flight client-side validation
+    if (!validateAll()) {
+      setStatus('error');
+      setServerError('Please correct the highlighted fields before submitting.');
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const res = await fetch('/api/contact', {
@@ -31,10 +86,11 @@ export default function ContactForm() {
       if (!res.ok) throw new Error(data.error || 'Failed to send message.');
 
       setStatus('success');
-      setFormData({ name: '', email: '', phone: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', message: '', hp: '' });
+      setFieldErrors({});
     } catch (err: any) {
       setStatus('error');
-      setErrorMessage(err.message || 'Something went wrong. Please call or text us directly at (770) 601-6344.');
+      setServerError(err.message || 'Something went wrong. Please call or text us directly at (770) 601-6344.');
     } finally {
       setLoading(false);
     }
@@ -151,7 +207,7 @@ export default function ContactForm() {
                 <div>
                   <h4 className="font-bold text-sm">Message Delivered!</h4>
                   <p className="text-xs text-green-700 mt-0.5">
-                    Your message has been delivered to Esmeralda Arenas. For immediate loads, call or text <strong>(770) 601-6344</strong>.
+                    Your inquiry has been delivered directly to our dispatch operations desk. We will call or text you shortly.
                   </p>
                 </div>
               </div>
@@ -161,25 +217,47 @@ export default function ContactForm() {
               <div className="mb-6 p-5 rounded-2xl bg-red-50 border border-red-200 text-red-900 flex items-start gap-3">
                 <AlertCircle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="font-bold text-sm">Failed to Send</h4>
-                  <p className="text-xs text-red-700 mt-0.5">{errorMessage}</p>
+                  <h4 className="font-bold text-sm">Please Check Your Entries</h4>
+                  <p className="text-xs text-red-700 mt-0.5">{serverError}</p>
                 </div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="space-y-4">
+              {/* Hidden bot honeypot field */}
+              <input
+                type="text"
+                name="user_fax_hp"
+                value={formData.hp}
+                onChange={(e) => setFormData({ ...formData, hp: e.target.value })}
+                style={{ display: 'none' }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
+
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  Your Name / Carrier Name *
+                  Your Full Name / Carrier Name *
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="e.g. John Doe / Apex Trucking"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-am-red bg-slate-50/50 text-am-dark text-sm"
+                  className={`w-full px-4 py-3 rounded-xl border text-sm transition bg-slate-50/50 text-am-dark outline-none ${
+                    fieldErrors.name
+                      ? 'border-red-500 bg-red-50/30 focus:ring-2 focus:ring-red-400'
+                      : 'border-slate-300 focus:border-am-red focus:ring-2 focus:ring-am-red/20'
+                  }`}
                 />
+                {fieldErrors.name && (
+                  <p className="text-xs font-semibold text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.name}</span>
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -191,23 +269,44 @@ export default function ContactForm() {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                     placeholder="john@carrier.com"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-am-red bg-slate-50/50 text-am-dark text-sm"
+                    className={`w-full px-4 py-3 rounded-xl border text-sm transition bg-slate-50/50 text-am-dark outline-none ${
+                      fieldErrors.email
+                        ? 'border-red-500 bg-red-50/30 focus:ring-2 focus:ring-red-400'
+                        : 'border-slate-300 focus:border-am-red focus:ring-2 focus:ring-am-red/20'
+                    }`}
                   />
+                  {fieldErrors.email && (
+                    <p className="text-xs font-semibold text-red-600 mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{fieldErrors.email}</span>
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Phone Number *
+                    Phone Number (Cell / Direct) *
                   </label>
                   <input
                     type="tel"
                     required
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="(555) 000-0000"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-am-red bg-slate-50/50 text-am-dark text-sm"
+                    onChange={handlePhoneChange}
+                    placeholder="(770) 601-6344"
+                    maxLength={14}
+                    className={`w-full px-4 py-3 rounded-xl border text-sm transition bg-slate-50/50 text-am-dark outline-none font-medium ${
+                      fieldErrors.phone
+                        ? 'border-red-500 bg-red-50/30 focus:ring-2 focus:ring-red-400'
+                        : 'border-slate-300 focus:border-am-red focus:ring-2 focus:ring-am-red/20'
+                    }`}
                   />
+                  {fieldErrors.phone && (
+                    <p className="text-xs font-semibold text-red-600 mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{fieldErrors.phone}</span>
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -218,10 +317,20 @@ export default function ContactForm() {
                 <textarea
                   rows={4}
                   value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  onChange={(e) => handleInputChange('message', e.target.value)}
                   placeholder="Tell us what equipment you run, current empty location, or specific questions..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-am-red bg-slate-50/50 text-am-dark text-sm"
+                  className={`w-full px-4 py-3 rounded-xl border text-sm transition bg-slate-50/50 text-am-dark outline-none ${
+                    fieldErrors.message
+                      ? 'border-red-500 bg-red-50/30 focus:ring-2 focus:ring-red-400'
+                      : 'border-slate-300 focus:border-am-red focus:ring-2 focus:ring-am-red/20'
+                  }`}
                 />
+                {fieldErrors.message && (
+                  <p className="text-xs font-semibold text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{fieldErrors.message}</span>
+                  </p>
+                )}
               </div>
 
               <button
@@ -230,7 +339,7 @@ export default function ContactForm() {
                 className="w-full py-4 px-6 rounded-xl text-sm font-extrabold text-white bg-am-red hover:bg-am-red-hover transition shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
-                  <span>Dispatching Message via Resend...</span>
+                  <span>Sending Message via Resend...</span>
                 ) : (
                   <>
                     <span>Send Message to Dispatch Operations</span>
