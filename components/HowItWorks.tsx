@@ -5,7 +5,6 @@ import {
   Search,
   Handshake,
   FileCheck2,
-  BadgeDollarSign,
   CheckCircle2,
   Phone,
   ArrowRight,
@@ -17,15 +16,15 @@ export default function HowItWorks() {
   const steps = [
     {
       step: '01',
-      title: 'Strategic Lane & Load Sourcing',
-      badge: 'Morning Market Scan',
+      title: 'Strategic Lane & Freight Sourcing',
+      badge: 'Daily Market Sourcing',
       icon: Search,
       description:
-        'Your dedicated dispatcher evaluates your equipment type, current location, and available driving hours. We scan DAT One Pro, Truckstop, and private shipper networks to pinpoint high-dollar, reliable freight.',
+        'Your dedicated dispatcher evaluates your equipment type, current location, and preferred running lanes. We scan DAT One Pro, Truckstop, and private shipper networks to pinpoint top-paying freight while cutting unnecessary deadhead.',
       bullets: [
         'Seasoned 1+ Year MC Tier-1 broker access',
-        'Pre-vetted broker credit & payment ratings',
-        'Continuous loop routing to cut empty deadhead',
+        'Vetted broker credit & verified payment history',
+        'Continuous lane loops to eliminate empty miles',
       ],
     },
     {
@@ -34,36 +33,23 @@ export default function HowItWorks() {
       badge: '100% Driver Approval',
       icon: Handshake,
       description:
-        'We negotiate aggressively on your behalf for maximum rate-per-mile, detention pay ($75–$100/hr), and TONU protections ($150–$300+). We present every load to you — you hold 100% veto power. We never force loads.',
+        'We negotiate directly with freight brokers for top rate-per-mile, contractual detention compensation, and TONU protection. We present every rate confirmation directly to you — you hold 100% final approval with zero forced dispatch.',
       bullets: [
-        'Direct broker rate con verification',
-        'Contractual detention & layover enforcement',
-        'Zero forced dispatch — your final call',
+        'Original broker rate confirmation transparency',
+        'Contractual detention & TONU compensation',
+        'Strict 100% No Forced Dispatch policy',
       ],
     },
     {
       step: '03',
-      title: 'Packets, COIs & Appointments',
+      title: 'Complete Back-Office & Invoicing',
       badge: 'Hands-Off Paperwork',
       icon: FileCheck2,
       description:
-        'Once you accept a load, our back office completes the broker setup packet, submits your Certificate of Insurance (COI), schedules dock appointments, and remains on standby 24/7 if any shipper issues arise.',
+        'We execute all broker setup packets, submit your Certificates of Insurance (COI), and schedule dock appointments. Upon delivery, we submit your signed BOL directly to your factoring company for fast funding.',
       bullets: [
-        'Rapid packet execution (under 15 mins)',
-        'Shipper & receiver appointment coordination',
-        '24/7 emergency & on-road breakdown desk',
-      ],
-    },
-    {
-      step: '04',
-      title: 'Delivery & Fast Factoring Pay',
-      badge: 'Same-Day Capital Flow',
-      icon: BadgeDollarSign,
-      description:
-        'After delivery, simply snap a clear photo of your signed Bill of Lading (BOL). We process and submit the invoice directly to your factoring company or broker for prompt payment. No long-term lock-ins.',
-      bullets: [
-        'Direct factoring submission (Apex, RTS, Triumph, etc.)',
-        'Zero upfront fees — pay only after loads deliver',
+        'Rapid broker packet execution & COI submission',
+        'Direct factoring company invoice submission',
         'Flexible agreement — pause or cancel with 1-week notice',
       ],
     },
@@ -75,24 +61,24 @@ export default function HowItWorks() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-am-red-light text-am-red border border-red-200">
-            <Clock className="w-3.5 h-3.5" /> Daily Dispatch Workflow
+            <Clock className="w-3.5 h-3.5" /> 3-Step Dispatch Workflow
           </span>
           <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold text-am-dark tracking-tight">
             How Your Daily Dispatch Works
           </h2>
           <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed">
-            From initial morning lane sourcing to same-day factoring settlement, our operations team works as your full back office so you can focus entirely on the open road.
+            From morning lane sourcing to same-day factoring submission, our operations desk manages the heavy lifting so you stay focused on the road.
           </p>
         </div>
 
-        {/* 4 Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        {/* 3 Steps Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
           {steps.map((item, idx) => {
             const Icon = item.icon;
             return (
               <div
                 key={idx}
-                className="relative bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-sm hover:shadow-xl hover:border-am-red/40 transition-all duration-300 flex flex-col justify-between group"
+                className="relative bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-am-red/40 transition-all duration-300 flex flex-col justify-between group"
               >
                 {/* Step Number Watermark */}
                 <span className="absolute top-4 right-5 text-4xl font-black text-slate-100 group-hover:text-red-50 transition-colors pointer-events-none">
@@ -100,7 +86,7 @@ export default function HowItWorks() {
                 </span>
 
                 <div>
-                  {/* Icon & Badge */}
+                  {/* Icon */}
                   <div className="flex items-center justify-between mb-5">
                     <div className="w-12 h-12 rounded-xl bg-am-red-light text-am-red flex items-center justify-center border border-red-200 group-hover:bg-am-red group-hover:text-white transition-colors shadow-sm">
                       <Icon className="w-6 h-6" />
@@ -111,20 +97,20 @@ export default function HowItWorks() {
                     {item.badge}
                   </span>
 
-                  <h3 className="text-lg font-black text-am-dark group-hover:text-am-red transition-colors">
+                  <h3 className="text-xl font-black text-am-dark group-hover:text-am-red transition-colors">
                     {item.title}
                   </h3>
 
-                  <p className="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  <p className="mt-3 text-sm text-slate-600 leading-relaxed">
                     {item.description}
                   </p>
                 </div>
 
                 {/* Checklist Bullets */}
-                <div className="mt-6 pt-5 border-t border-slate-100 space-y-2">
+                <div className="mt-6 pt-5 border-t border-slate-100 space-y-2.5">
                   {item.bullets.map((bullet, bIdx) => (
                     <div key={bIdx} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-am-red shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 text-am-red shrink-0 mt-0.5" />
                       <span className="text-xs font-semibold text-slate-700 leading-snug">
                         {bullet}
                       </span>
@@ -137,7 +123,7 @@ export default function HowItWorks() {
         </div>
 
         {/* Bottom Action Strip */}
-        <div className="mt-14 p-6 sm:p-8 rounded-3xl bg-am-dark text-white border border-slate-800 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-6">
+        <div className="mt-14 max-w-6xl mx-auto p-6 sm:p-8 rounded-3xl bg-am-dark text-white border border-slate-800 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-6">
           <div className="space-y-1 text-center lg:text-left">
             <div className="flex items-center justify-center lg:justify-start gap-2 text-am-red text-xs font-bold uppercase tracking-wider">
               <ShieldCheck className="w-4 h-4" /> Seasoned Carrier Operations
