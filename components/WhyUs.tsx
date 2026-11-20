@@ -37,7 +37,7 @@ export default function WhyUs() {
     },
     {
       feature: 'Contract Terms',
-      am: 'Zero long-term contracts. Weekly billing.',
+      am: 'No long-term lock-ins. Pause or terminate with 1 week notice.',
       callCenters: 'Monthly lock-ins & penalty clauses',
       diy: 'No contracts, but inconsistent revenue',
     },

@@ -13,19 +13,19 @@ export default function FAQ() {
     },
     {
       q: 'Do I have to sign a long-term contract with A&M Pro Dispatch?',
-      a: 'Never. We operate with zero long-term commitments or lock-ins. All we require is that you honor and complete any load we book on your behalf and settle the agreed dispatch fee once delivery is confirmed. You can pause or terminate dispatching at any time with no penalties.',
+      a: 'Never. We operate with zero long-term commitments or lock-ins. All we require is that you honor and complete any load we book on your behalf and settle the agreed dispatch fee once delivery is confirmed. You can pause or terminate dispatching services at any time — we simply require a 1-week notice.',
     },
     {
-      q: 'Do you accept brand new MC Authorities (under 90 or 180 days)?',
-      a: 'Yes, 100%! While many brokers restrict younger motor carrier authorities, A&M Pro Dispatch maintains established relationships with hundreds of vetted brokers and direct shippers that happily book carriers with new authorities. We help you build miles, safety history, and broker credit from day one.',
+      q: 'Do you work with new MC authorities or is there a minimum age requirement?',
+      a: 'We work with motor carriers that possess at least 1 year of active FMCSA operating authority. This ensures access to the highest-paying freight, top-tier broker networks, and direct shippers who require seasoned authority.',
     },
     {
       q: 'Does A&M Pro Dispatch ever force loads on drivers?',
       a: 'Absolutely not. We have a strict 100% No Forced Dispatch policy. You have complete veto power over every single load, lane, destination, rate per mile, and commodity. If you don’t like a load, we keep searching until we find one that meets your exact criteria.',
     },
     {
-      q: 'How do payments and dispatch fees work?',
-      a: 'We work directly with your factoring company (e.g. Apex, RTS, OTR, Triumph) to submit all invoices and rate confirmations for immediate funding to your bank. If you do not factor, we send you a simple weekly dispatch invoice only AFTER you have completed your loads.',
+      q: 'How do rate quotes and dispatch fee payments work?',
+      a: 'We provide custom, competitive rate quotes tailored to your equipment, preferred lanes, and fleet size when you call in. We work directly with your factoring company (e.g. Apex, RTS, OTR, Triumph) for fast funding, or send a simple weekly dispatch invoice only after you complete your deliveries. No upfront fees.',
     },
     {
       q: 'How many trucks does each dispatcher handle?',

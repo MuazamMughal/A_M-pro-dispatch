@@ -162,15 +162,15 @@ export default function RootLayout({
         name: 'Do I have to sign a long-term contract with A&M Pro Dispatch?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Never. We operate with zero long-term commitments or lock-ins. All we require is that you honor and complete any load we book on your behalf and settle the agreed dispatch fee once delivery is confirmed.',
+          text: 'Never. We operate with zero long-term commitments or lock-ins. All we require is that you honor and complete any load we book on your behalf and settle the agreed dispatch fee once delivery is confirmed. You can pause or terminate dispatching at any time with a 1-week notice.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Do you accept brand new MC Authorities (under 90 or 180 days)?',
+        name: 'Do you work with new MC authorities or is there a minimum age requirement?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes! A&M Pro Dispatch maintains established relationships with hundreds of vetted brokers and direct shippers that actively book carriers with new authorities under 90 days.',
+          text: 'We work with motor carriers that possess at least 1 year of active FMCSA operating authority. This ensures access to the highest-paying freight, top-tier broker networks, and direct shippers who require seasoned authority.',
         },
       },
       {
@@ -183,10 +183,10 @@ export default function RootLayout({
       },
       {
         '@type': 'Question',
-        name: 'How do payments and dispatch fees work?',
+        name: 'How do rate quotes and dispatch fee payments work?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'We work directly with your factoring company to submit all invoices and rate confirmations for immediate funding. If you do not factor, we send you a simple weekly dispatch invoice only after you complete your loads.',
+          text: 'We provide custom, competitive rate quotes tailored to your equipment, preferred lanes, and fleet size when you call in. We work directly with your factoring company for fast funding, or send a simple weekly dispatch invoice only after you complete your deliveries. No upfront fees.',
         },
       },
       {

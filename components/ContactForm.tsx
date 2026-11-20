@@ -110,7 +110,7 @@ export default function ContactForm() {
                 Get In Touch With A&amp;M Pro Dispatch
               </h2>
               <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed">
-                Have questions about our lane capacity, percentage rates, broker networks, or carrier setup? Our dispatch operations team is available 24/7.
+                Have questions about our lane capacity, custom rate quotes, broker networks, or carrier setup? Our dispatch operations team is available 24/7.
               </p>
             </div>
 
@@ -147,7 +147,6 @@ export default function ContactForm() {
                   <a href="mailto:Esmeralda@amprodispatch.com" className="text-base font-bold text-am-dark hover:text-am-red transition">
                     Esmeralda@amprodispatch.com
                   </a>
-                  <p className="text-xs text-slate-500 mt-0.5">Send Rate Cons, COIs &amp; invoices directly</p>
                 </div>
               </div>
 

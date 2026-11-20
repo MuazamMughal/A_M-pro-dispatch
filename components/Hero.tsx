@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowRight, CheckCircle2, DollarSign, Shield, Zap, TrendingUp, PhoneCall } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Shield, Zap, TrendingUp, PhoneCall, Phone } from 'lucide-react';
 
 export default function Hero() {
   return (
@@ -47,11 +47,11 @@ export default function Hero() {
               </a>
 
               <a
-                href="#calculator"
+                href="tel:7706016344"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl text-base font-bold text-am-dark bg-am-offwhite hover:bg-slate-100 border border-slate-300 transition"
               >
-                <DollarSign className="w-4 h-4 text-am-red" />
-                <span>Calculate Weekly Profit</span>
+                <Phone className="w-4 h-4 text-am-red" />
+                <span>Call for Custom Quote</span>
               </a>
             </div>
 
@@ -67,11 +67,11 @@ export default function Hero() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-am-red shrink-0" />
-                <span className="text-xs font-semibold text-slate-700">New MC Authorities Welcomed</span>
+                <span className="text-xs font-semibold text-slate-700">1+ Year Active MC Required</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-am-red shrink-0" />
-                <span className="text-xs font-semibold text-slate-700">Transparent Flat % Fee</span>
+                <span className="text-xs font-semibold text-slate-700">Custom Rates Quoted on Call</span>
               </div>
             </div>
           </div>

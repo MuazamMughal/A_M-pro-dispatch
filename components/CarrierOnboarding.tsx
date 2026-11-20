@@ -143,7 +143,7 @@ export default function CarrierOnboarding() {
             Get Set Up &amp; Rolling In Under 24 Hours
           </h2>
           <p className="mt-3 text-slate-400 text-sm sm:text-base">
-            No long onboarding delays. Complete the carrier form below and our operations department will immediately review your operating credentials and prepare high-paying loads.
+            Complete the carrier form below and our operations department will review your operating credentials and prepare high-paying loads. <strong className="text-white">Note: We partner with carriers holding at least 1 year of active FMCSA authority.</strong>
           </p>
         </div>
 
@@ -317,7 +317,7 @@ export default function CarrierOnboarding() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
-                    MC Number (Motor Carrier) *
+                    MC Number (1+ Year Active) *
                   </label>
                   <input
                     type="text"

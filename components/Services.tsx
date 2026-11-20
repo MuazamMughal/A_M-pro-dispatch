@@ -65,12 +65,12 @@ export default function Services() {
     },
     {
       icon: ShieldCheck,
-      title: 'New MC Authority Program',
-      desc: 'Authority under 90 or 180 days? Don’t let broker restrictions park your truck. We partner with hundreds of brokers who actively book new authorities.',
+      title: 'Established MC Program (1+ Year)',
+      desc: 'We partner with motor carriers holding at least 1 year of active FMCSA authority to secure premium Tier-1 freight, direct shipper contracts, and top spot market rates.',
       features: [
-        'No authority age discrimination',
-        'Rapid credit & safety rating building',
-        'Guidance on FMCSA compliance & audits',
+        'Exclusive Tier-1 freight & high RPM lanes',
+        'Priority shipper & broker direct contract access',
+        'Full compliance & credential maintenance',
       ],
     },
   ];

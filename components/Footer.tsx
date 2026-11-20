@@ -59,16 +59,10 @@ export default function Footer() {
                 <a href="#equipment" className="hover:text-white transition">Supported Equipment</a>
               </li>
               <li>
-                <a href="#calculator" className="hover:text-white transition">Profit Calculator</a>
-              </li>
-              <li>
                 <a href="#why-us" className="hover:text-white transition">Why A&amp;M Pro</a>
               </li>
               <li>
                 <a href="#carrier-signup" className="hover:text-white transition text-am-red font-bold">Carrier Sign-Up</a>
-              </li>
-              <li>
-                <a href="#testimonials" className="hover:text-white transition">Testimonials</a>
               </li>
               <li>
                 <a href="#faq" className="hover:text-white transition">FAQ</a>

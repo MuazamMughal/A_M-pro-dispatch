@@ -25,9 +25,9 @@ export default function StatsStrip() {
     },
     {
       icon: ShieldCheck,
-      value: '0 Contracts',
+      value: '0 Lock-Ins',
       label: 'Zero Long-Term Commitments',
-      highlight: '100% No Forced Dispatch',
+      highlight: '1-Week Notice to Pause/End',
     },
   ];
 
