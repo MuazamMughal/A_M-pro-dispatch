@@ -59,6 +59,9 @@ export default function Footer() {
                 <a href="#equipment" className="hover:text-white transition">Supported Equipment</a>
               </li>
               <li>
+                <a href="#how-it-works" className="hover:text-white transition">How It Works</a>
+              </li>
+              <li>
                 <a href="#why-us" className="hover:text-white transition">Why A&amp;M Pro</a>
               </li>
               <li>
